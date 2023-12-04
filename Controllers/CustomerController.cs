@@ -21,7 +21,7 @@ namespace HouseFun.Controllers
         }
 
         [HttpGet(template: "{contactName}")]
-        public ActionResult GetCustomerDataById(string contactName)
+        public IActionResult GetCustomerDataById(string contactName)
         {
             northwind = new Northwind();
             responseBody = northwind.SelectCustomerDataById(contactName);
@@ -35,25 +35,33 @@ namespace HouseFun.Controllers
         }
 
         [HttpPost]
-        public void PostCustomersData()
+        public IActionResult PostCustomersData([FromBody] Customer customers)
+        {
+            northwind = new Northwind();
+            responseBody = northwind.InsertCustomerData(customers);
+
+            if (responseBody == null)
+            {
+                return BadRequest(customers);
+            }
+
+            return Ok(responseBody);
+        }
+
+        [HttpPut(template: "{contactName}")]
+        public void PutCustomerData(string contactName)
         {
 
         }
 
-        [HttpPut(template: "{id}")]
-        public void PutCustomerData(int id)
+        [HttpPatch(template: "{contactName}")]
+        public void PatchCustomerData(string contactName)
         {
 
         }
 
-        [HttpPatch(template: "{id}")]
-        public void PatchCustomerData(int id)
-        {
-
-        }
-
-        [HttpDelete(template: "{id}")]
-        public void DeleteCustomerData(int id)
+        [HttpDelete(template: "{contactName}")]
+        public void DeleteCustomerData(string contactName)
         {
 
         }

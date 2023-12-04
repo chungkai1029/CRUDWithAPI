@@ -1,6 +1,6 @@
 ﻿namespace HouseFun.Models
 {
-    public class Customers
+    public class Customer
     {
         public string CustomerID { get; set; }
         public string CompanyName { get; set; }

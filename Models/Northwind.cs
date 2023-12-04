@@ -6,16 +6,17 @@ namespace HouseFun.Models
 {
     public class Northwind
     {
-        // Model and list to handle all data read from dataTable column.
-        List<Customers> customersList;
-        Customers customers;
+        // Model and list to handle all data read from DataTable column.
+        List<Customer> customerList;
+        Customer customer;
 
         SqlConnection sqlConnection;
         SqlCommand sqlCommand;
 
+        //
         // Connect string use to connect with Northwind.dbo.Customers.
-        StringBuilder connectString = new StringBuilder("Data Source=(local);Initial Catalog=Northwind;Integrated Security=true");
-        // Query string use to get or set data to the dataTable.
+        StringBuilder connectString = new StringBuilder("Server=localhost;Database=master;Trusted_Connection=True;");
+        // Query string use to get data from the DataTable, or insert/update data into DataTable.
         StringBuilder queryString;
 
         // A return string to send back to calling place with a json format.
@@ -23,7 +24,6 @@ namespace HouseFun.Models
 
         public string? SelectCustomersData()
         {
-            // Query string use to get data from the dataTable.
             queryString = new StringBuilder();
             queryString.Append("SELECT CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ");
             queryString.Append("FROM Northwind.dbo.Customers");
@@ -36,17 +36,17 @@ namespace HouseFun.Models
 
                 // Open the connection in a try/catch block.
                 // Create and execute the DataReader, writing the result set to the console window.
-                // Initalize the model and list of model to store data read from dataTable.
+                // Initalize the model and list of model to store data read from DataTable.
                 try
                 {
-                    customersList = new List<Customers>();
+                    customerList = new List<Customer>();
 
                     sqlConnection.Open();
                     SqlDataReader reader = sqlCommand.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        customers = new Customers
+                        customer = new Customer
                         {
                             CustomerID = reader[0].ToString(),
                             CompanyName = reader[1].ToString(),
@@ -62,13 +62,13 @@ namespace HouseFun.Models
                         };
 
                         // After reading for a cycle, store them into the list.
-                        customersList.Add(customers);
+                        customerList.Add(customer);
                     }
 
-                    // Serialize the list get from dataTable as a json string.
+                    // Serialize the list get from DataTable as a json string.
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
-                    jsonString = JsonSerializer.Serialize(customersList, options);
+                    jsonString = JsonSerializer.Serialize(customerList, options);
                     Console.WriteLine($"customersList={jsonString}");
                     return jsonString;
                 }
@@ -82,7 +82,6 @@ namespace HouseFun.Models
 
         public string? SelectCustomerDataById(string contactName)
         {
-            // Query string use to get data from the dataTable with a condition.
             queryString = new StringBuilder();
             queryString.Append("SELECT CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ");
             queryString.Append("FROM Northwind.dbo.Customers ");
@@ -102,10 +101,10 @@ namespace HouseFun.Models
                     {
                         return null;
                     }
-                    
+
                     while (reader.Read())
                     {
-                        customers = new Customers
+                        customer = new Customer
                         {
                             CustomerID = reader[0].ToString(),
                             CompanyName = reader[1].ToString(),
@@ -121,10 +120,60 @@ namespace HouseFun.Models
                         };
                     }
 
-                    // Serialize the model get from dataTable as a json string.
+                    // Serialize the model get from DataTable as a json string.
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
-                    jsonString = JsonSerializer.Serialize(customers, options);
+                    jsonString = JsonSerializer.Serialize(customer, options);
+                    Console.WriteLine($"customers={jsonString}");
+
+                    return jsonString;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    return null;
+                }
+            }
+        }
+
+        public string? InsertCustomerData(Customer insertCustomer)
+        {
+            queryString = new StringBuilder();
+            queryString.Append("INSERT INTO Northwind.dbo.Customers(CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax) ");
+            queryString.Append("VALUES(@CustomerID, @CompanyName, @ContactName, @ContactTitle, @Address, @City, @Region, @PostalCode, @Country, @Phone, @Fax)");
+
+            using (sqlConnection = new SqlConnection(connectString.ToString()))
+            {
+                sqlCommand = new(queryString.ToString(), sqlConnection);
+
+                try
+                {
+                    sqlConnection.Open();
+
+                    sqlCommand.Parameters.AddWithValue("@CustomerID", insertCustomer.CustomerID);
+                    sqlCommand.Parameters.AddWithValue("@CompanyName", insertCustomer.CompanyName);
+                    sqlCommand.Parameters.AddWithValue("@ContactName", insertCustomer.ContactName);
+                    sqlCommand.Parameters.AddWithValue("@ContactTitle", insertCustomer.ContactTitle);
+                    sqlCommand.Parameters.AddWithValue("@Address", insertCustomer.Address);
+                    sqlCommand.Parameters.AddWithValue("@City", insertCustomer.City);
+                    sqlCommand.Parameters.AddWithValue("@Region", insertCustomer.Region);
+                    sqlCommand.Parameters.AddWithValue("@PostalCode", insertCustomer.PostalCode);
+                    sqlCommand.Parameters.AddWithValue("@Country", insertCustomer.Country);
+                    sqlCommand.Parameters.AddWithValue("@Phone", insertCustomer.Phone);
+                    sqlCommand.Parameters.AddWithValue("@Fax", insertCustomer.Fax);
+
+                    int result = sqlCommand.ExecuteNonQuery();
+
+                    if (result < 0)
+                    {
+                        Console.WriteLine("Error inserting data into DataTable.");
+                        return null;
+                    }
+
+                    // Serialize the model get from DataTable as a json string.
+                    JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+
+                    jsonString = JsonSerializer.Serialize(insertCustomer, options);
                     Console.WriteLine($"customers={jsonString}");
 
                     return jsonString;
