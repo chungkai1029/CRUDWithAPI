@@ -167,7 +167,7 @@ namespace HouseFun.Models
 
                     if (result < 0)
                     {
-                        Console.WriteLine("Error inserting data into DataTable.");
+                        Console.WriteLine("Insert data into DataTable error.");
                         return null;
                     }
 
@@ -218,7 +218,7 @@ namespace HouseFun.Models
 
                     if (result < 0)
                     {
-                        Console.WriteLine("Error updating data of DataTable.");
+                        Console.WriteLine("Update data of DataTable error.");
                         return null;
                     }
 
@@ -245,10 +245,35 @@ namespace HouseFun.Models
             queryString.Append($"WHERE ContactName = \'{contactName}\'");
         }
 
-        public void DeleteCustomerData(string contactName)
+        public string? DeleteCustomerData(string contactName)
         {
             queryString = new StringBuilder();
             queryString.Append($"DELETE FROM Northwind.dbo.Customers WHERE ContactName = \'{contactName}\'");
+
+            using (SqlConnection sqlConnection = new SqlConnection(connectString.ToString()))
+            {
+                sqlCommand = new SqlCommand(queryString.ToString(), sqlConnection);
+
+                try
+                {
+                    sqlConnection.Open();
+                    int result = sqlCommand.ExecuteNonQuery();
+
+                    if (result < 0)
+                    {
+                        Console.WriteLine("Delete data from DataTable error.");
+                        return null;
+                    }
+
+                    Console.WriteLine("Delete data from DataTable success.");
+                    return "Success";
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    return null;
+                }
+            }
         }
     }
 }

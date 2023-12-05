@@ -71,10 +71,17 @@ namespace HouseFun.Controllers
         }
 
         [HttpDelete(template: "{contactName}")]
-        public void DeleteCustomerData(string contactName)
+        public IActionResult DeleteCustomerData(string contactName)
         {
             northwind = new Northwind();
-            northwind.DeleteCustomerData(contactName);
+            responseBody = northwind.DeleteCustomerData(contactName);
+
+            if(responseBody == null)
+            {
+                return BadRequest(contactName);
+            }
+
+            return Ok(responseBody);
         }
     }
 }
