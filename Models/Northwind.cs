@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Data.SqlClient;
+using Microsoft.AspNetCore.JsonPatch;
+using System.Reflection;
 
 namespace HouseFun.Models
 {
@@ -13,7 +15,6 @@ namespace HouseFun.Models
         SqlConnection sqlConnection;
         SqlCommand sqlCommand;
 
-        //
         // Connect string use to connect with Northwind.dbo.Customers.
         StringBuilder connectString = new StringBuilder("Server=localhost;Database=master;Trusted_Connection=True;");
         // Query string use to get data from the DataTable, or insert/update data into DataTable.
@@ -120,7 +121,6 @@ namespace HouseFun.Models
                         };
                     }
 
-                    // Serialize the model get from DataTable as a json string.
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
                     jsonString = JsonSerializer.Serialize(customer, options);
@@ -136,7 +136,7 @@ namespace HouseFun.Models
             }
         }
 
-        public string? InsertCustomerData(Customer insertCustomer)
+        public string? InsertCustomerData(Customer insertData)
         {
             queryString = new StringBuilder();
             queryString.Append("INSERT INTO Northwind.dbo.Customers(CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax) ");
@@ -150,17 +150,18 @@ namespace HouseFun.Models
                 {
                     sqlConnection.Open();
 
-                    sqlCommand.Parameters.AddWithValue("@CustomerID", insertCustomer.CustomerID);
-                    sqlCommand.Parameters.AddWithValue("@CompanyName", insertCustomer.CompanyName);
-                    sqlCommand.Parameters.AddWithValue("@ContactName", insertCustomer.ContactName);
-                    sqlCommand.Parameters.AddWithValue("@ContactTitle", insertCustomer.ContactTitle);
-                    sqlCommand.Parameters.AddWithValue("@Address", insertCustomer.Address);
-                    sqlCommand.Parameters.AddWithValue("@City", insertCustomer.City);
-                    sqlCommand.Parameters.AddWithValue("@Region", insertCustomer.Region);
-                    sqlCommand.Parameters.AddWithValue("@PostalCode", insertCustomer.PostalCode);
-                    sqlCommand.Parameters.AddWithValue("@Country", insertCustomer.Country);
-                    sqlCommand.Parameters.AddWithValue("@Phone", insertCustomer.Phone);
-                    sqlCommand.Parameters.AddWithValue("@Fax", insertCustomer.Fax);
+                    // Assign value to the target column.
+                    sqlCommand.Parameters.AddWithValue("@CustomerID", insertData.CustomerID);
+                    sqlCommand.Parameters.AddWithValue("@CompanyName", insertData.CompanyName);
+                    sqlCommand.Parameters.AddWithValue("@ContactName", insertData.ContactName);
+                    sqlCommand.Parameters.AddWithValue("@ContactTitle", insertData.ContactTitle);
+                    sqlCommand.Parameters.AddWithValue("@Address", insertData.Address);
+                    sqlCommand.Parameters.AddWithValue("@City", insertData.City);
+                    sqlCommand.Parameters.AddWithValue("@Region", insertData.Region);   // Null exception has not complete.
+                    sqlCommand.Parameters.AddWithValue("@PostalCode", insertData.PostalCode);   // Null exception has not complete.
+                    sqlCommand.Parameters.AddWithValue("@Country", insertData.Country);
+                    sqlCommand.Parameters.AddWithValue("@Phone", insertData.Phone);
+                    sqlCommand.Parameters.AddWithValue("@Fax", insertData.Fax); // Null exception has not complete.
 
                     int result = sqlCommand.ExecuteNonQuery();
 
@@ -170,10 +171,9 @@ namespace HouseFun.Models
                         return null;
                     }
 
-                    // Serialize the model get from DataTable as a json string.
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
-                    jsonString = JsonSerializer.Serialize(insertCustomer, options);
+                    jsonString = JsonSerializer.Serialize(insertData, options);
                     Console.WriteLine($"customers={jsonString}");
 
                     return jsonString;
@@ -184,6 +184,71 @@ namespace HouseFun.Models
                     return null;
                 }
             }
+        }
+
+        public string? PutCustomerData(string contactName, Customer putData)
+        {
+            queryString = new StringBuilder();
+            queryString.Append("UPDATE Northwind.dbo.Customers ");
+            queryString.Append("SET CustomerID = @CustomerID, CompanyName = @CompanyName, ContactName = @ContactName, ContactTitle = @ContactTitle, Address = @Address, City = @City, Region = @Region, PostalCode = @PostalCode, Country = @Country, Phone = @Phone, Fax = @Fax ");
+            queryString.Append($"WHERE ContactName = \'{contactName}\'");
+
+            using (sqlConnection = new SqlConnection(connectString.ToString()))
+            {
+                sqlCommand = new SqlCommand(queryString.ToString(), sqlConnection);
+
+                try
+                {
+                    sqlConnection.Open();
+
+                    // Update value to the target column.
+                    sqlCommand.Parameters.AddWithValue("@CustomerID", putData.CustomerID);
+                    sqlCommand.Parameters.AddWithValue("@CompanyName", putData.CompanyName);
+                    sqlCommand.Parameters.AddWithValue("@ContactName", putData.ContactName);
+                    sqlCommand.Parameters.AddWithValue("@ContactTitle", putData.ContactTitle);
+                    sqlCommand.Parameters.AddWithValue("@Address", putData.Address);
+                    sqlCommand.Parameters.AddWithValue("@City", putData.City);
+                    sqlCommand.Parameters.AddWithValue("@Region", putData.Region);  // Null exception has not complete.
+                    sqlCommand.Parameters.AddWithValue("@PostalCode", putData.PostalCode);  // Null exception has not complete.
+                    sqlCommand.Parameters.AddWithValue("@Country", putData.Country);
+                    sqlCommand.Parameters.AddWithValue("@Phone", putData.Phone);
+                    sqlCommand.Parameters.AddWithValue("@Fax", putData.Fax);    // Null exception has not complete.
+
+                    int result = sqlCommand.ExecuteNonQuery();
+
+                    if (result < 0)
+                    {
+                        Console.WriteLine("Error updating data of DataTable.");
+                        return null;
+                    }
+
+                    JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+
+                    jsonString = JsonSerializer.Serialize(putData, options);
+                    Console.WriteLine($"customers={jsonString}");
+
+                    return jsonString;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    return null;
+                }
+            }
+        }
+
+        public void PatchCustomerData(string contactName, JsonPatchDocument<Customer> patch)
+        {
+            queryString = new StringBuilder();
+            queryString.Append("UPDATE Northwind.dbo.Customers ");
+            queryString.Append("SET CustomerID = @CustomerID, CompanyName = @CompanyName, ContactName = @ContactName, ContactTitle = @ContactTitle, Address = @Address, City = @City, Region = @Region, PostalCode = @PostalCode, Country = @Country, Phone = @Phone, Fax = @Fax ");
+            queryString.Append($"WHERE ContactName = \'{contactName}\'");
+        }
+
+        public void DeleteCustomerData(string contactName)
+        {
+            queryString = new StringBuilder();
+            queryString.Append($"DELETE FROM Northwind.dbo.Customers WHERE ContactName = \'{contactName}\'");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 using HouseFun.Models;
 
 namespace HouseFun.Controllers
@@ -35,35 +36,45 @@ namespace HouseFun.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostCustomersData([FromBody] Customer customers)
+        public IActionResult PostCustomersData([FromBody] Customer postCustomer)
         {
             northwind = new Northwind();
-            responseBody = northwind.InsertCustomerData(customers);
+            responseBody = northwind.InsertCustomerData(postCustomer);
 
             if (responseBody == null)
             {
-                return BadRequest(customers);
+                return BadRequest(postCustomer);
             }
 
             return Ok(responseBody);
         }
 
         [HttpPut(template: "{contactName}")]
-        public void PutCustomerData(string contactName)
+        public IActionResult PutCustomerData(string contactName, [FromBody] Customer putCustomer)
         {
+            northwind = new Northwind();
+            responseBody = northwind.PutCustomerData(contactName, putCustomer);
 
+            if (responseBody == null)
+            {
+                return BadRequest(putCustomer);
+            }
+
+            return Ok(responseBody);
         }
 
         [HttpPatch(template: "{contactName}")]
-        public void PatchCustomerData(string contactName)
+        public void PatchCustomerData(string contactName, [FromBody] JsonPatchDocument<Customer> patchCustomer)
         {
-
+            northwind = new Northwind();
+            northwind.PatchCustomerData(contactName, patchCustomer);
         }
 
         [HttpDelete(template: "{contactName}")]
         public void DeleteCustomerData(string contactName)
         {
-
+            northwind = new Northwind();
+            northwind.DeleteCustomerData(contactName);
         }
     }
 }
