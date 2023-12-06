@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Http.Extensions;
 using HouseFun.Models;
 
 namespace HouseFun.Controllers
@@ -39,6 +40,11 @@ namespace HouseFun.Controllers
         [HttpPost]
         public IActionResult PostCustomersData([FromBody] Customer postCustomer)
         {
+            if(postCustomer == null)
+            {
+                return BadRequest(postCustomer);
+            }
+
             northwind = new Northwind();
             responseBody = northwind.InsertCustomerData(postCustomer);
 
@@ -47,12 +53,18 @@ namespace HouseFun.Controllers
                 return BadRequest(postCustomer);
             }
 
-            return Ok(responseBody);
+            return Created(Request.GetDisplayUrl(), responseBody);
+            //return Ok(responseBody);
         }
 
         [HttpPut(template: "{customerID}")]
         public IActionResult PutCustomerData(string customerID, [FromBody] Customer putCustomer)
         {
+            if(putCustomer == null)
+            {
+                return BadRequest(putCustomer);
+            }
+
             northwind = new Northwind();
             responseBody = northwind.PutCustomerDataById(customerID, putCustomer);
 
@@ -89,7 +101,7 @@ namespace HouseFun.Controllers
                 return BadRequest(customer);
             }
 
-            return new ObjectResult(responseBody);
+            return Ok(responseBody);
         }
 
         [HttpDelete(template: "{customerID}")]
@@ -103,7 +115,7 @@ namespace HouseFun.Controllers
                 return BadRequest(customerID);
             }
 
-            return Ok(responseBody);
+            return NoContent();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Data.SqlClient;
+using System.Reflection;
 
 namespace HouseFun.Models
 {
@@ -68,7 +69,6 @@ namespace HouseFun.Models
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
                     jsonString = JsonSerializer.Serialize(customerList, options);
-                    Console.WriteLine($"customersList={jsonString}");
                     return jsonString;
                 }
                 catch (Exception ex)
@@ -85,7 +85,6 @@ namespace HouseFun.Models
             queryString.Append("SELECT CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ");
             queryString.Append("FROM Northwind.dbo.Customers ");
             queryString.Append($"WHERE CustomerID = \'{customerID}\';");
-            Console.WriteLine(queryString.ToString());
 
             using (sqlConnection = new SqlConnection(connectString.ToString()))
             {
@@ -96,7 +95,7 @@ namespace HouseFun.Models
                     sqlConnection.Open();
                     SqlDataReader reader = sqlCommand.ExecuteReader();
 
-                    // If the reader cannot find the target row then jump out.
+                    // If the reader cannot find the target row then jump out, but it will be failed.
                     //if (!reader.Read())
                     //{
                     //    return null;
@@ -123,8 +122,6 @@ namespace HouseFun.Models
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
                     jsonString = JsonSerializer.Serialize(customer, options);
-                    Console.WriteLine($"customer={jsonString}");
-
                     return jsonString;
                 }
                 catch (Exception ex)
@@ -173,8 +170,6 @@ namespace HouseFun.Models
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
                     jsonString = JsonSerializer.Serialize(insertData, options);
-                    Console.WriteLine($"customers={jsonString}");
-
                     return jsonString;
                 }
                 catch (Exception ex)
@@ -224,8 +219,6 @@ namespace HouseFun.Models
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
                     jsonString = JsonSerializer.Serialize(putData, options);
-                    Console.WriteLine($"customers={jsonString}");
-
                     return jsonString;
                 }
                 catch (Exception ex)
@@ -240,7 +233,31 @@ namespace HouseFun.Models
         {
             queryString = new StringBuilder();
             queryString.Append("UPDATE Northwind.dbo.Customers ");
-            queryString.Append("SET CustomerID = @CustomerID, CompanyName = @CompanyName, ContactName = @ContactName, ContactTitle = @ContactTitle, Address = @Address, City = @City, Region = @Region, PostalCode = @PostalCode, Country = @Country, Phone = @Phone, Fax = @Fax ");
+
+            PropertyInfo[] properties = typeof(Customer).GetProperties();
+            int propertyCount = 0;
+
+            foreach (PropertyInfo property in properties)
+            {
+                // Set the value that get from request to the property and check whether value is null.
+                var value = property.GetValue(patchData);
+
+                if (value == null)
+                {
+                    continue;
+                }
+
+                if (propertyCount == 0)
+                {
+                    queryString.Append($"SET {property.Name} = \'{value}\'");
+                    propertyCount++;
+                    continue;
+                }
+
+                queryString.Append($", {property.Name} = \'{value}\' ");
+                propertyCount++;
+            }
+
             queryString.Append($"WHERE CustomerID = \'{customerID}\'");
 
             using (sqlConnection = new SqlConnection(connectString.ToString()))
@@ -250,19 +267,6 @@ namespace HouseFun.Models
                 try
                 {
                     sqlConnection.Open();
-
-                    // Update part of value to the target column.
-                    sqlCommand.Parameters.AddWithValue("@CustomerID", customerID);
-                    sqlCommand.Parameters.AddWithValue("@CompanyName", patchData.CompanyName);
-                    sqlCommand.Parameters.AddWithValue("@ContactName", patchData.ContactName == null ? DBNull.Value : patchData.ContactName);
-                    sqlCommand.Parameters.AddWithValue("@ContactTitle", patchData.ContactTitle == null ? DBNull.Value : patchData.ContactTitle);
-                    sqlCommand.Parameters.AddWithValue("@Address", patchData.Address == null ? DBNull.Value : patchData.Address);
-                    sqlCommand.Parameters.AddWithValue("@City", patchData.City == null ? DBNull.Value : patchData.City);
-                    sqlCommand.Parameters.AddWithValue("@Region", patchData.Region == null ? DBNull.Value : patchData.Region);  // Null exception has not complete.
-                    sqlCommand.Parameters.AddWithValue("@PostalCode", patchData.PostalCode == null ? DBNull.Value : patchData.PostalCode);  // Null exception has not complete.
-                    sqlCommand.Parameters.AddWithValue("@Country", patchData.Country == null ? DBNull.Value : patchData.Country);
-                    sqlCommand.Parameters.AddWithValue("@Phone", patchData.Phone == null ? DBNull.Value : patchData.Phone);
-                    sqlCommand.Parameters.AddWithValue("@Fax", patchData.Fax == null ? DBNull.Value : patchData.Fax);    // Null exception has not complete.
 
                     int result = sqlCommand.ExecuteNonQuery();
 
@@ -275,8 +279,6 @@ namespace HouseFun.Models
                     JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
                     jsonString = JsonSerializer.Serialize(patchData, options);
-                    Console.WriteLine($"customers={jsonString}");
-
                     return jsonString;
                 }
                 catch (Exception ex)
