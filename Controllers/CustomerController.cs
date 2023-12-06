@@ -9,6 +9,7 @@ namespace HouseFun.Controllers
     public class CustomersController : ControllerBase
     {
         Northwind northwind;
+        Customer customer;
         // Response body use to response the request from apis.
         string? responseBody;
 
@@ -21,15 +22,15 @@ namespace HouseFun.Controllers
             return Ok(responseBody);
         }
 
-        [HttpGet(template: "{contactName}")]
-        public IActionResult GetCustomerDataById(string contactName)
+        [HttpGet(template: "{customerID}")]
+        public IActionResult GetCustomerDataById(string customerID)
         {
             northwind = new Northwind();
-            responseBody = northwind.SelectCustomerDataById(contactName);
+            responseBody = northwind.SelectCustomerDataById(customerID);
 
             if (responseBody == null)
             {
-                return BadRequest(contactName);
+                return BadRequest(customerID);
             }
 
             return Ok(responseBody);
@@ -49,11 +50,11 @@ namespace HouseFun.Controllers
             return Ok(responseBody);
         }
 
-        [HttpPut(template: "{contactName}")]
-        public IActionResult PutCustomerData(string contactName, [FromBody] Customer putCustomer)
+        [HttpPut(template: "{customerID}")]
+        public IActionResult PutCustomerData(string customerID, [FromBody] Customer putCustomer)
         {
             northwind = new Northwind();
-            responseBody = northwind.PutCustomerData(contactName, putCustomer);
+            responseBody = northwind.PutCustomerDataById(customerID, putCustomer);
 
             if (responseBody == null)
             {
@@ -63,22 +64,43 @@ namespace HouseFun.Controllers
             return Ok(responseBody);
         }
 
-        [HttpPatch(template: "{contactName}")]
-        public void PatchCustomerData(string contactName, [FromBody] JsonPatchDocument<Customer> patchCustomer)
+        [HttpPatch(template: "{customerID}")]
+        public IActionResult PatchCustomerData(string customerID, [FromBody] JsonPatchDocument<Customer> patchCustomer)
         {
+            if (patchCustomer == null)
+            {
+                return BadRequest(ModelState);
+            }
+
             northwind = new Northwind();
-            northwind.PatchCustomerData(contactName, patchCustomer);
+            customer = new Customer();
+
+            patchCustomer.ApplyTo(customer, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            responseBody = northwind.PatchCustomerDataById(customerID, customer);
+
+            if (responseBody == null)
+            {
+                return BadRequest(customer);
+            }
+
+            return new ObjectResult(responseBody);
         }
 
-        [HttpDelete(template: "{contactName}")]
-        public IActionResult DeleteCustomerData(string contactName)
+        [HttpDelete(template: "{customerID}")]
+        public IActionResult DeleteCustomerData(string customerID)
         {
             northwind = new Northwind();
-            responseBody = northwind.DeleteCustomerData(contactName);
+            responseBody = northwind.DeleteCustomerDataById(customerID);
 
             if(responseBody == null)
             {
-                return BadRequest(contactName);
+                return BadRequest(customerID);
             }
 
             return Ok(responseBody);
