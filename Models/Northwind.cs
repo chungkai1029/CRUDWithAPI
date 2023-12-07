@@ -35,7 +35,7 @@ namespace HouseFun.Models
                 sqlCommand = new(queryString.ToString(), sqlConnection);
 
                 // Open the connection in a try/catch block.
-                // Create and execute the DataReader, writing the result set to the console window.
+                // Create and execute the DataReader, writing the result set to the model.
                 // Initalize the model and list of model to store data read from DataTable.
                 try
                 {
@@ -147,21 +147,9 @@ namespace HouseFun.Models
                     sqlConnection.Open();
 
                     // Assign value to the target column and handle null exception.
-                    sqlCommand.Parameters.AddWithValue("@CustomerID", insertData.CustomerID);
-                    sqlCommand.Parameters.AddWithValue("@CompanyName", insertData.CompanyName);
-                    sqlCommand.Parameters.AddWithValue("@ContactName", insertData.ContactName == null ? DBNull.Value : insertData.ContactName);
-                    sqlCommand.Parameters.AddWithValue("@ContactTitle", insertData.ContactTitle == null ? DBNull.Value : insertData.ContactTitle);
-                    sqlCommand.Parameters.AddWithValue("@Address", insertData.Address == null ? DBNull.Value : insertData.Address);
-                    sqlCommand.Parameters.AddWithValue("@City", insertData.City == null ? DBNull.Value : insertData.City);
-                    sqlCommand.Parameters.AddWithValue("@Region", insertData.Region == null ? DBNull.Value : insertData.Region);
-                    sqlCommand.Parameters.AddWithValue("@PostalCode", insertData.PostalCode == null ? DBNull.Value : insertData.PostalCode);
-                    sqlCommand.Parameters.AddWithValue("@Country", insertData.Country == null ? DBNull.Value : insertData.Country);
-                    sqlCommand.Parameters.AddWithValue("@Phone", insertData.Phone == null ? DBNull.Value : insertData.Phone);
-                    sqlCommand.Parameters.AddWithValue("@Fax", insertData.Fax == null ? DBNull.Value : insertData.Fax);
+                    int insertResult  = ParametersAddWithValue(sqlCommand, insertData);
 
-                    int result = sqlCommand.ExecuteNonQuery();
-
-                    if (result < 0)
+                    if (insertResult < 0)
                     {
                         Console.WriteLine("Insert data into DataTable error.");
                         return null;
@@ -196,21 +184,9 @@ namespace HouseFun.Models
                     sqlConnection.Open();
 
                     // Update all of value to the target column and handle null exception.
-                    sqlCommand.Parameters.AddWithValue("@CustomerID", putData.CustomerID);
-                    sqlCommand.Parameters.AddWithValue("@CompanyName", putData.CompanyName);
-                    sqlCommand.Parameters.AddWithValue("@ContactName", putData.ContactName == null ? DBNull.Value : putData.ContactName);
-                    sqlCommand.Parameters.AddWithValue("@ContactTitle", putData.ContactTitle == null ? DBNull.Value : putData.ContactTitle);
-                    sqlCommand.Parameters.AddWithValue("@Address", putData.Address == null ? DBNull.Value : putData.Address);
-                    sqlCommand.Parameters.AddWithValue("@City", putData.City == null ? DBNull.Value : putData.City);
-                    sqlCommand.Parameters.AddWithValue("@Region", putData.Region == null ? DBNull.Value : putData.Region);
-                    sqlCommand.Parameters.AddWithValue("@PostalCode", putData.PostalCode == null ? DBNull.Value : putData.PostalCode);
-                    sqlCommand.Parameters.AddWithValue("@Country", putData.Country == null ? DBNull.Value : putData.Country);
-                    sqlCommand.Parameters.AddWithValue("@Phone", putData.Phone == null ? DBNull.Value : putData.Phone);
-                    sqlCommand.Parameters.AddWithValue("@Fax", putData.Fax == null ? DBNull.Value : putData.Fax);
+                    int putResult = ParametersAddWithValue(sqlCommand, putData);
 
-                    int result = sqlCommand.ExecuteNonQuery();
-
-                    if (result < 0)
+                    if (putResult < 0)
                     {
                         Console.WriteLine("Update data of DataTable error.");
                         return null;
@@ -268,9 +244,9 @@ namespace HouseFun.Models
                 {
                     sqlConnection.Open();
 
-                    int result = sqlCommand.ExecuteNonQuery();
+                    int patchResult = sqlCommand.ExecuteNonQuery();
 
-                    if (result < 0)
+                    if (patchResult < 0)
                     {
                         Console.WriteLine("Update data of DataTable error.");
                         return null;
@@ -318,6 +294,23 @@ namespace HouseFun.Models
                     return null;
                 }
             }
+        }
+
+        int ParametersAddWithValue(SqlCommand command, Customer addCustomer)
+        {
+            command.Parameters.AddWithValue("@CustomerID", addCustomer.CustomerID);
+            command.Parameters.AddWithValue("@CompanyName", addCustomer.CompanyName);
+            command.Parameters.AddWithValue("@ContactName", addCustomer.ContactName == null ? DBNull.Value : addCustomer.ContactName);
+            command.Parameters.AddWithValue("@ContactTitle", addCustomer.ContactTitle == null ? DBNull.Value : addCustomer.ContactTitle);
+            command.Parameters.AddWithValue("@Address", addCustomer.Address == null ? DBNull.Value : addCustomer.Address);
+            command.Parameters.AddWithValue("@City", addCustomer.City == null ? DBNull.Value : addCustomer.City);
+            command.Parameters.AddWithValue("@Region", addCustomer.Region == null ? DBNull.Value : addCustomer.Region);
+            command.Parameters.AddWithValue("@PostalCode", addCustomer.PostalCode == null ? DBNull.Value : addCustomer.PostalCode);
+            command.Parameters.AddWithValue("@Country", addCustomer.Country == null ? DBNull.Value : addCustomer.Country);
+            command.Parameters.AddWithValue("@Phone", addCustomer.Phone == null ? DBNull.Value : addCustomer.Phone);
+            command.Parameters.AddWithValue("@Fax", addCustomer.Fax == null ? DBNull.Value : addCustomer.Fax);
+
+            return command.ExecuteNonQuery();
         }
     }
 }
