@@ -1,4 +1,4 @@
-﻿namespace HouseFun.Models
+﻿namespace SqlServerCRUD.Models
 {
     public class Customer
     {

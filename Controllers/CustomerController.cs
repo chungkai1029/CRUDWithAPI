@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Http.Extensions;
-using HouseFun.Models;
+using SqlServerCRUD.Models;
 
-namespace HouseFun.Controllers
+namespace SqlServerCRUD.Controllers
 {
     [Route("[controller]")]
     [ApiController]

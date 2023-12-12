@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "HouseFun": {
+    "SqlServerCRUD": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
