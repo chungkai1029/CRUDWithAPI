@@ -1,4 +1,4 @@
-﻿namespace SqlServerCRUD.Models
+﻿namespace CRUDWithAPI.Models
 {
     public class Customer
     {

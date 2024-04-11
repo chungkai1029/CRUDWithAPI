@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Data.SqlClient;
 using System.Reflection;
 
-namespace SqlServerCRUD.Models
+namespace CRUDWithAPI.Models
 {
     public class Northwind
     {

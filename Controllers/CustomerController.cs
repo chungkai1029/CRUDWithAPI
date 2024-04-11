@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Http.Extensions;
-using SqlServerCRUD.Models;
+using CRUDWithAPI.Models;
 
-namespace SqlServerCRUD.Controllers
+namespace CRUDWithAPI.Controllers
 {
     [Route("[controller]")]
     [ApiController]
