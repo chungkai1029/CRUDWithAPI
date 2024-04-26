@@ -4,9 +4,10 @@
       "ignored": "true",
       "type": "sqlite"
     },
-    "mssql1": {
+    "mssql2": {
       "ignored": "true",
-      "type": "mssql"
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection"
     }
   }
 }
